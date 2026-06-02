@@ -23,7 +23,7 @@
 // Get a free key at: https://openweathermap.org/api
 const API_KEY = 'd7b1d6d0eec042dba3a54658a7e1bd62';
 
-const API_BASE  = 'https://api.openweathermap.org/data/2.5';
+const API_BASE = 'https://api.openweathermap.org/data/2.5';
 const ICON_BASE = 'https://openweathermap.org/img/wn';
 const MAX_RECENT = 6;
 
@@ -47,37 +47,37 @@ let state = {
 const $ = id => document.getElementById(id);
 
 const dom = {
-  bgLayer:        $('bgLayer'),
-  searchInput:    $('searchInput'),
-  searchBtn:      $('searchBtn'),
-  geoBtn:         $('geoBtn'),
+  bgLayer: $('bgLayer'),
+  searchInput: $('searchInput'),
+  searchBtn: $('searchBtn'),
+  geoBtn: $('geoBtn'),
   recentSearches: $('recentSearches'),
-  dashboard:      $('dashboard'),
-  loading:        $('loadingSpinner'),
-  errorBanner:    $('errorBanner'),
-  errorMsg:       $('errorMsg'),
-  themeToggle:    $('themeToggle'),
-  themeIcon:      $('themeIcon'),
-  clockTime:      $('clockTime'),
-  clockDate:      $('clockDate'),
+  dashboard: $('dashboard'),
+  loading: $('loadingSpinner'),
+  errorBanner: $('errorBanner'),
+  errorMsg: $('errorMsg'),
+  themeToggle: $('themeToggle'),
+  themeIcon: $('themeIcon'),
+  clockTime: $('clockTime'),
+  clockDate: $('clockDate'),
   // Current weather
-  cityName:    $('cityName'),
+  cityName: $('cityName'),
   cityCountry: $('cityCountry'),
   weatherDesc: $('weatherDesc'),
   weatherIcon: $('weatherIcon'),
   currentTemp: $('currentTemp'),
-  tempUnit:    $('tempUnit'),
-  feelsLike:   $('feelsLike'),
-  humidity:    $('humidity'),
-  windSpeed:   $('windSpeed'),
-  pressure:    $('pressure'),
-  visibility:  $('visibility'),
-  sunrise:     $('sunrise'),
-  sunset:      $('sunset'),
-  tempMin:     $('tempMin'),
-  tempMax:     $('tempMax'),
-  clouds:      $('clouds'),
-  alertBody:   $('alertBody'),
+  tempUnit: $('tempUnit'),
+  feelsLike: $('feelsLike'),
+  humidity: $('humidity'),
+  windSpeed: $('windSpeed'),
+  pressure: $('pressure'),
+  visibility: $('visibility'),
+  sunrise: $('sunrise'),
+  sunset: $('sunset'),
+  tempMin: $('tempMin'),
+  tempMax: $('tempMax'),
+  clouds: $('clouds'),
+  alertBody: $('alertBody'),
   // Forecast
   forecastRow: $('forecastRow'),
 };
@@ -200,7 +200,20 @@ function handleGeoLocation() {
     },
     err => {
       showLoading(false);
-      showError('Unable to retrieve location. Please allow location access.');
+
+      switch (err.code) {
+        case 1:
+          showError("Location permission denied.");
+          break;
+        case 2:
+          showError("Location unavailable. Turn on Windows Location Services.");
+          break;
+        case 3:
+          showError("Location request timed out.");
+          break;
+        default:
+          showError("Unable to retrieve location.");
+      }
     }
   );
 }
@@ -223,7 +236,7 @@ async function fetchWeather(city) {
       fetchForecast(city),
     ]);
 
-    state.currentData  = current;
+    state.currentData = current;
     state.forecastData = forecast;
 
     renderCurrentWeather(current);
@@ -250,7 +263,7 @@ async function fetchWeatherByCoords(lat, lon) {
     apiFetch(`${API_BASE}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`),
   ]);
 
-  state.currentData  = current;
+  state.currentData = current;
   state.forecastData = forecast;
 
   renderCurrentWeather(current);
@@ -295,33 +308,33 @@ function renderCurrentWeather(data) {
   const { name, sys, weather, main, wind, visibility, clouds } = data;
 
   // City & condition
-  dom.cityName.textContent    = name;
+  dom.cityName.textContent = name;
   dom.cityCountry.textContent = `${sys.country} · ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`;
   dom.weatherDesc.textContent = weather[0].description;
-  dom.alertBody.textContent   = `${weather[0].description} · Feels ${main.feels_like.toFixed(1) < main.temp ? 'colder' : 'warmer'} than actual temperature.`;
+  dom.alertBody.textContent = `${weather[0].description} · Feels ${main.feels_like.toFixed(1) < main.temp ? 'colder' : 'warmer'} than actual temperature.`;
 
   // Icon
   dom.weatherIcon.src = `${ICON_BASE}/${weather[0].icon}@2x.png`;
   dom.weatherIcon.alt = weather[0].description;
 
   // Temperatures (store in Celsius for conversion)
-  state._tempC       = main.temp;
-  state._feelsLikeC  = main.feels_like;
-  state._tempMinC    = main.temp_min;
-  state._tempMaxC    = main.temp_max;
+  state._tempC = main.temp;
+  state._feelsLikeC = main.feels_like;
+  state._tempMinC = main.temp_min;
+  state._tempMaxC = main.temp_max;
 
   updateDisplayedTemperatures();
 
   // Other stats
-  dom.humidity.textContent  = `${main.humidity}%`;
+  dom.humidity.textContent = `${main.humidity}%`;
   dom.windSpeed.textContent = `${wind.speed} m/s`;
-  dom.pressure.textContent  = `${main.pressure} hPa`;
+  dom.pressure.textContent = `${main.pressure} hPa`;
   dom.visibility.textContent = visibility ? `${(visibility / 1000).toFixed(1)} km` : 'N/A';
-  dom.clouds.textContent    = `${clouds.all}%`;
+  dom.clouds.textContent = `${clouds.all}%`;
 
   // Sunrise / Sunset
   dom.sunrise.textContent = formatTime(sys.sunrise);
-  dom.sunset.textContent  = formatTime(sys.sunset);
+  dom.sunset.textContent = formatTime(sys.sunset);
 
   // Dynamic background
   setWeatherBackground(weather[0].main);
@@ -338,17 +351,17 @@ function renderCurrentWeather(data) {
  */
 function convertTemp(celsius) {
   switch (state.unit) {
-    case 'imperial': return (celsius * 9/5) + 32;
-    case 'kelvin':   return celsius + 273.15;
-    default:         return celsius;           // metric (°C)
+    case 'imperial': return (celsius * 9 / 5) + 32;
+    case 'kelvin': return celsius + 273.15;
+    default: return celsius;           // metric (°C)
   }
 }
 
 function unitLabel() {
   switch (state.unit) {
     case 'imperial': return '°F';
-    case 'kelvin':   return 'K';
-    default:         return '°C';
+    case 'kelvin': return 'K';
+    default: return '°C';
   }
 }
 
@@ -362,10 +375,10 @@ function formatTemp(celsius, decimals = 1) {
 function updateDisplayedTemperatures() {
   const label = unitLabel();
   dom.currentTemp.textContent = formatTemp(state._tempC, 0);
-  dom.tempUnit.textContent    = label;
-  dom.feelsLike.textContent   = `${formatTemp(state._feelsLikeC)}${label}`;
-  dom.tempMin.textContent     = `${formatTemp(state._tempMinC)}${label}`;
-  dom.tempMax.textContent     = `${formatTemp(state._tempMaxC)}${label}`;
+  dom.tempUnit.textContent = label;
+  dom.feelsLike.textContent = `${formatTemp(state._feelsLikeC)}${label}`;
+  dom.tempMin.textContent = `${formatTemp(state._tempMinC)}${label}`;
+  dom.tempMax.textContent = `${formatTemp(state._tempMaxC)}${label}`;
 
   // Re-render forecast temp displays
   if (state.forecastData) renderForecastTemps();
@@ -384,9 +397,9 @@ function renderForecast(data) {
   dom.forecastRow.innerHTML = '';
 
   daily.forEach((day, i) => {
-    const date    = new Date(day.dt * 1000);
+    const date = new Date(day.dt * 1000);
     const dayName = i === 0 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    const icon    = `${ICON_BASE}/${day.weather[0].icon}@2x.png`;
+    const icon = `${ICON_BASE}/${day.weather[0].icon}@2x.png`;
 
     const card = document.createElement('div');
     card.className = 'col-6 col-md-4 col-lg';
@@ -480,7 +493,7 @@ function buildTempChart(daily, labels) {
     switch (key) {
       case 'max': return daily.map(d => parseFloat(formatTemp(d._maxC)));
       case 'min': return daily.map(d => parseFloat(formatTemp(d._minC)));
-      default:    return daily.map(d => parseFloat(formatTemp((d._maxC + d._minC) / 2)));
+      default: return daily.map(d => parseFloat(formatTemp((d._maxC + d._minC) / 2)));
     }
   };
 
@@ -586,21 +599,21 @@ function chartOptions(yLabel) {
    ══════════════════════════════════════ */
 
 const BG_MAP = {
-  Clear:        'weather-clear',
-  Clouds:       'weather-clouds',
-  Rain:         'weather-rain',
-  Drizzle:      'weather-rain',
+  Clear: 'weather-clear',
+  Clouds: 'weather-clouds',
+  Rain: 'weather-rain',
+  Drizzle: 'weather-rain',
   Thunderstorm: 'weather-thunderstorm',
-  Snow:         'weather-snow',
-  Mist:         'weather-mist',
-  Smoke:        'weather-mist',
-  Haze:         'weather-mist',
-  Dust:         'weather-mist',
-  Fog:          'weather-mist',
-  Sand:         'weather-mist',
-  Ash:          'weather-mist',
-  Squall:       'weather-rain',
-  Tornado:      'weather-thunderstorm',
+  Snow: 'weather-snow',
+  Mist: 'weather-mist',
+  Smoke: 'weather-mist',
+  Haze: 'weather-mist',
+  Dust: 'weather-mist',
+  Fog: 'weather-mist',
+  Sand: 'weather-mist',
+  Ash: 'weather-mist',
+  Squall: 'weather-rain',
+  Tornado: 'weather-thunderstorm',
 };
 
 function setWeatherBackground(condition) {
